@@ -17,15 +17,21 @@ $abonne = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($abonne['statut'] === 'suspendu') {
     $error = "Vous êtes suspendu et ne pouvez pas faire d'emprunt.";
 } else {
-    $livres_disponibles = [];
-    $stmt = $conn->prepare("
-        SELECT l.isbn, l.titre 
-        FROM livre l
-        LEFT JOIN emprunt e ON l.isbn = e.isbn AND e.retourne = 0
-        WHERE e.isbn IS NULL
-    ");
-    $stmt->execute();
-    $livres_disponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Récupération des livres disponibles
+   $stmt = $conn->prepare("
+    SELECT l.isbn, l.titre 
+    FROM livre l
+    WHERE l.isbn NOT IN (
+        SELECT e.isbn 
+        FROM emprunt e 
+        WHERE e.retourne = 0 
+        AND (e.date_retour IS NULL OR e.date_retour > NOW())
+    )
+");
+$stmt->execute();
+$livres_disponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $isbn = $_POST['isbn'];
@@ -33,6 +39,7 @@ if ($abonne['statut'] === 'suspendu') {
         $date_retour = $_POST['date_retour'];
         $date_emprunt = date('Y-m-d');
 
+        // Vérification de la disponibilité du livre pour la période sélectionnée
         $stmt = $conn->prepare("
             SELECT * FROM emprunt 
             WHERE isbn = :isbn 
@@ -45,6 +52,7 @@ if ($abonne['statut'] === 'suspendu') {
         $stmt->bindParam(':date_recuperation', $date_recuperation);
         $stmt->bindParam(':date_retour', $date_retour);
         $stmt->execute();
+        
         if ($stmt->rowCount() > 0) {
             $error = "Le livre est déjà emprunté durant cette période.";
         } elseif ($date_recuperation > $date_retour) {
@@ -78,45 +86,45 @@ if ($abonne['statut'] === 'suspendu') {
         body {
             background-color: #f8f9fa;
         }
-     
         .alert {
             margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container" style="max-width: 600px;
-            margin-top: 150px;">
-        <div class="card" style="padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-            <div class="card-header" style="background-color: #007bff;
-            color: #fff;
-            border-bottom: 1px solid #0069d9;">
+    <div class="container" style="max-width: 600px; margin-top: 150px;">
+        <div class="card" style="padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="background-color: #007bff; color: #fff; border-bottom: 1px solid #0069d9;">
                 <h2 class="text-center">Ajouter Emprunt</h2>
             </div>
             <div class="card-body">
                 <?php if (isset($error)) { echo "<div class='alert alert-danger'>$error</div>"; } ?>
                 <?php if (isset($success_message)) { echo "<div class='alert alert-success'>$success_message</div>"; } ?>
-                <form id="empruntForm" method="post" action="emprunt_ajouter.php">
-                    <div class="mb-3">
-                        <label for="isbn" class="form-label" >Choisir un Livre</label>
-                        <select class="form-select" style="border-radius: 10px; height:40px; width:120px;"  id="isbn" name="isbn" required>
-                            <?php foreach ($livres_disponibles as $livre) { ?>
-                                <option value="<?php echo htmlspecialchars($livre['isbn']); ?>"><?php echo htmlspecialchars($livre['titre']); ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="date_recuperation" class="form-label">Date de Récupération</label>
-                        <input type="date" class="form-control" id="date_recuperation" name="date_recuperation" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="date_retour" class="form-label">Date de Retour</label>
-                        <input type="date" class="form-control" id="date_retour" name="date_retour" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Emprunter</button>
-                </form>
+
+                <?php if (empty($livres_disponibles)) { ?>
+                    <div class="alert alert-warning">Aucun livre disponible pour l'emprunt.</div>
+                <?php } else { ?>
+                    <form id="empruntForm" method="post" action="emprunt_ajouter.php">
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label">Choisir un Livre</label>
+                            <select class="form-select" id="isbn" name="isbn" required>
+                                <option value="">Sélectionnez un livre</option>
+                                <?php foreach ($livres_disponibles as $livre) { ?>
+                                    <option value="<?php echo htmlspecialchars($livre['isbn']); ?>"><?php echo htmlspecialchars($livre['titre']); ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date_recuperation" class="form-label">Date de Récupération</label>
+                            <input type="date" class="form-control" id="date_recuperation" name="date_recuperation" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date_retour" class="form-label">Date de Retour</label>
+                            <input type="date" class="form-control" id="date_retour" name="date_retour" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Emprunter</button>
+                    </form>
+                <?php } ?>
             </div>
         </div>
     </div>
@@ -134,4 +142,5 @@ if ($abonne['statut'] === 'suspendu') {
     </script>
     
     <?php include('../includes/footer.php'); ?>
-
+</body>
+</html>

@@ -33,7 +33,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="adminAbonnesDropdown">
                         <a class="dropdown-item" href="../admin/abonne_liste.php">Liste des Abonnés</a>
-                        <a class="dropdown-item" href="../admin/abonne_ajouter.php">Ajouter un Abonné</a>
+                        <!-- <a class="dropdown-item" href="../admin/abonne_ajouter.php">Ajouter un Abonné</a> -->
                     </div>
                 </li>
                 <li class="nav-item dropdown">

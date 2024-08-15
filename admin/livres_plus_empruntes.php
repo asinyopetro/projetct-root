@@ -9,11 +9,8 @@ if (!isset($_SESSION['admin_logged_in']) || !$_SESSION['admin_logged_in']) {
 }
 
 $query = "
-    SELECT l.isbn, l.titre, l.auteur, COUNT(e.isbn) AS nombre_emprunts
-    FROM livre l
-    JOIN emprunt e ON l.isbn = e.isbn
-    WHERE e.retourne = 0
-    GROUP BY l.isbn
+    SELECT l.isbn, l.titre, l.auteur, COUNT(e.isbn) AS nombre_emprunts 
+    FROM livre l JOIN emprunt e ON l.isbn = e.isbn WHERE e.retourne = 0 GROUP BY l.isbn 
     ORDER BY nombre_emprunts DESC
 ";
 
