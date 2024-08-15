@@ -1,5 +1,5 @@
 <?php
-include('../includes/navbar_user.php');
+include('../includes/navbar_admin.php');
 include('../includes/config.php');
 
 $livres = [];
@@ -8,14 +8,15 @@ $categorie_id = null;
 if (isset($_GET['categorie_id']) && is_numeric($_GET['categorie_id'])) {
     $categorie_id = intval($_GET['categorie_id']);
     try {
-        $sql = "SELECT * FROM livre WHERE categorie_id = $categorie_id";
-        $stmt = $conn->query($sql);
+        $stmt = $conn->prepare("SELECT * FROM livre WHERE categorie_id = ?");
+        $stmt->execute([$categorie_id]);
         $livres = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         echo "<p class='text-danger'>Erreur de requête : " . htmlspecialchars($e->getMessage()) . "</p>";
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -28,38 +29,44 @@ if (isset($_GET['categorie_id']) && is_numeric($_GET['categorie_id'])) {
         body {
             background-color: #f8f9fa;
         }
+       
         .alert {
             margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container" style="max-width: 800px; margin-top: 50px;">
-        <div class="card" style="padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-            <div class="card-header" style="background-color: #007bff; color: #fff; border-bottom: 1px solid #0069d9;">
+    <div class="container" style="max-width: 800px;
+            margin-top: 50px;">
+        <div class="card" style=" padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <div class="card-header" style="   background-color: #007bff;
+            color: #fff;
+            border-bottom: 1px solid #0069d9;">
                 <h2 class="text-center">Recherche de Livres par Catégorie</h2>
             </div>
             <div class="card-body">
-                <form method="get" action="livre_recherche_categorie.php">
-                    <div class="mb-3">
-                        <label for="categorie_id" class="form-label">Catégorie</label>
-                        <select class="form-select" id="categorie_id" name="categorie_id" required>
-                            <option value="" disabled selected>Sélectionner une catégorie</option>
-                            <?php
-                            try {
-                                $stmt = $conn->query("SELECT * FROM categorie");
-                                $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                                foreach ($categories as $categorie) {
-                                    echo '<option value="' . htmlspecialchars($categorie['id']) . '">' . htmlspecialchars($categorie['nom']) . '</option>';
-                                }
-                            } catch (PDOException $e) {
-                                echo "<p class='text-danger'>Erreur de récupération des catégories : " . htmlspecialchars($e->getMessage()) . "</p>";
+            <form method="get" action="livre_recherche_categorie.php">
+                <div class="mb-3">
+                    <label for="categorie_id" class="form-label">Catégorie</label>
+                    <select class="form-select" id="categorie_id" name="categorie_id" required>
+                        <option value="" disabled selected>Sélectionner une catégorie</option>
+                        <?php
+                        try {
+                            $stmt = $conn->query("SELECT * FROM categorie");
+                            $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                            foreach ($categories as $categorie) {
+                                echo '<option value="' . htmlspecialchars($categorie['id']) . '">' . htmlspecialchars($categorie['nom']) . '</option>';
                             }
-                            ?>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Rechercher</button>
-                </form>
+                        } catch (PDOException $e) {
+                            echo "<p class='text-danger'>Erreur de récupération des catégories : " . htmlspecialchars($e->getMessage()) . "</p>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+            </form>
                 <?php if (!empty($livres)) { ?>
                     <h3 class="mt-4">Résultats de la Recherche</h3>
                     <table class="table table-striped mt-3">
@@ -82,11 +89,12 @@ if (isset($_GET['categorie_id']) && is_numeric($_GET['categorie_id'])) {
                             <?php } ?>
                         </tbody>
                     </table>
+                    <?php } else { ?>
+                    <p class="text-danger">Aucun livre trouvé pour cette catégorie.</p>
                 <?php } ?>
             </div>
         </div>
     </div>
 
     <?php include('../includes/footer.php'); ?>
-</body>
-</html>
+

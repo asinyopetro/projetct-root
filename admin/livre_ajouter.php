@@ -2,26 +2,19 @@
 include('../includes/navbar_admin.php');
 include('../includes/config.php');
 
-$stmt = $conn->prepare("SELECT * FROM categorie");
-$stmt->execute();
+$stmt = $conn->query("SELECT * FROM categorie");
 $categories = $stmt->fetchAll();
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isbn = $_POST['isbn'];
     $titre = $_POST['titre'];
     $auteur = $_POST['auteur'];
     $categorie_id = $_POST['categorie_id'];
     $annee_publication = $_POST['annee_publication'];
 
-    if (!empty($isbn) && !empty($titre) && !empty($auteur) && !empty($categorie_id) && !empty($annee_publication)) {
-        $stmt = $conn->prepare("INSERT INTO livre (isbn, titre, auteur, categorie_id, annee_publication) VALUES (:isbn, :titre, :auteur, :categorie_id, :annee_publication)");
-        $stmt->bindParam(':isbn', $isbn);
-        $stmt->bindParam(':titre', $titre);
-        $stmt->bindParam(':auteur', $auteur);
-        $stmt->bindParam(':categorie_id', $categorie_id);
-        $stmt->bindParam(':annee_publication', $annee_publication);
-        
-        if ($stmt->execute()) {
+    if ($isbn && $titre && $auteur && $categorie_id && $annee_publication) {
+        $stmt = $conn->prepare("INSERT INTO livre (isbn, titre, auteur, categorie_id, annee_publication) VALUES (?, ?, ?, ?, ?)");
+        if ($stmt->execute([$isbn, $titre, $auteur, $categorie_id, $annee_publication])) {
             $message = "Le livre a été ajouté avec succès.";
             $message_type = "success";
         } else {
@@ -34,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">

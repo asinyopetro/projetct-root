@@ -25,6 +25,8 @@
                     <div class="dropdown-menu" aria-labelledby="adminLivresDropdown">
                         <a class="dropdown-item" href="../admin/livre_liste.php">Liste des Livres</a>
                         <a class="dropdown-item" href="../admin/livre_ajouter.php">Ajouter un Livre</a>
+                        <a class="dropdown-item" href="../admin/livre_recherche_titre.php">Recherche par titre</a>
+                        <a class="dropdown-item" href="../admin/livre_recherche_categorie.php">Recherche par catégorie</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -33,7 +35,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="adminAbonnesDropdown">
                         <a class="dropdown-item" href="../admin/abonne_liste.php">Liste des Abonnés</a>
-                        <!-- <a class="dropdown-item" href="../admin/abonne_ajouter.php">Ajouter un Abonné</a> -->
+                        <a class="dropdown-item" href="../admin/abonne_ajouter.php">Ajouter un Abonné</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -57,7 +59,6 @@
                 </li>
             </ul>
             <a href="admin_logout.php" class="btn btn-secondary mt-1">Déconnexion</a>
-
         </div>
     </div>
 </nav>

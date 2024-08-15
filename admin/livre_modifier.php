@@ -1,43 +1,35 @@
 <?php
-include('../includes/navbar_admin.php');
 include('../includes/config.php');
-if (isset($_GET['isbn'])) {
-    $isbn = $_GET['isbn'];
-    $stmt = $conn->prepare("SELECT * FROM livre WHERE isbn = :isbn");
-    $stmt->bindParam(':isbn', $isbn);
-    $stmt->execute();
-    $livre = $stmt->fetch();
 
-    $stmt = $conn->prepare("SELECT * FROM categorie");
-    $stmt->execute();
-    $categories = $stmt->fetchAll();
-}
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isbn = $_POST['isbn'];
     $titre = $_POST['titre'];
     $auteur = $_POST['auteur'];
     $categorie_id = $_POST['categorie_id'];
     $annee_publication = $_POST['annee_publication'];
 
-    if (empty($titre) || empty($auteur) || empty($categorie_id) || empty($annee_publication)) {
-        $error = "Tous les champs sont requis.";
-    } else {
-        $stmt = $conn->prepare("UPDATE livre SET titre = :titre, auteur = :auteur, categorie_id = :categorie_id, annee_publication = :annee_publication WHERE isbn = :isbn");
-        $stmt->bindParam(':isbn', $isbn);
-        $stmt->bindParam(':titre', $titre);
-        $stmt->bindParam(':auteur', $auteur);
-        $stmt->bindParam(':categorie_id', $categorie_id);
-        $stmt->bindParam(':annee_publication', $annee_publication);
-        if ($stmt->execute()) {
+    if ($titre && $auteur && $categorie_id && $annee_publication) {
+        $stmt = $conn->prepare("UPDATE livre SET titre = ?, auteur = ?, categorie_id = ?, annee_publication = ? WHERE isbn = ?");
+        if ($stmt->execute([$titre, $auteur, $categorie_id, $annee_publication, $isbn])) {
             header('Location: livre_liste.php');
             exit();
         } else {
-            $error = "Une erreur est survenue lors de la modification du livre.";
+            $error = "Erreur lors de la modification du livre.";
         }
+    } else {
+        $error = "Tous les champs sont requis.";
     }
+} else if (isset($_GET['isbn'])) {
+    $isbn = $_GET['isbn'];
+    $stmt = $conn->prepare("SELECT * FROM livre WHERE isbn = ?");
+    $stmt->execute([$isbn]);
+    $livre = $stmt->fetch();
+
+    $stmt = $conn->query("SELECT * FROM categorie");
+    $categories = $stmt->fetchAll();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">

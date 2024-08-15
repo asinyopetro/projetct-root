@@ -9,10 +9,8 @@ if (!isset($_SESSION['abonne_id'])) {
 }
 
 $abonne_id = $_SESSION['abonne_id'];
-$stmt = $conn->prepare("SELECT * FROM abonne WHERE id = :id");
-$stmt->bindParam(':id', $abonne_id);
-$stmt->execute();
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$sql = "SELECT * FROM abonne WHERE id = $abonne_id";
+$user = $conn->query($sql)->fetch(PDO::FETCH_ASSOC);
 
 if (!$user) {
     echo "Utilisateur non trouvé.";
@@ -30,22 +28,21 @@ if (!$user) {
 </head>
 <body style="background-color: #f0f2f5;">
 
-    <div class="container" style="margin-top: 100px;">
+    <div class="container mt-5">
         <h1 class="text-center mb-4">Bienvenue sur votre profil utilisateur</h1>
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card shadow-lg" style="border-radius: 8px;">
-                    <div class="card-header text-center" style="background-color: #007bff; color: #fff; border-bottom: 1px solid #0056b3;">
+                <div class="card shadow-lg rounded">
+                    <div class="card-header text-center bg-primary text-white">
                         <h2 class="mb-0">Informations de votre Profil</h2>
                     </div>
-                    <div class="card-body text-center" style="background-color: #fff;">
-                        
-                        <img src="https://via.placeholder.com/120" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px;" alt="Profile Image" class="profile-image">
+                    <div class="card-body text-center bg-white">
+                        <img src="https://via.placeholder.com/120" class="rounded-circle mb-3" style="width: 120px; height: 120px;" alt="Profile Image">
                         <p><strong>Nom:</strong> <?php echo htmlspecialchars($user['nom']); ?></p>
                         <p><strong>Prénom:</strong> <?php echo htmlspecialchars($user['prenom']); ?></p>
                         <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
                         <p class="mt-4">Pour améliorer votre expérience, assurez-vous que vos informations sont à jour. Vous pouvez modifier votre profil à tout moment.</p>
-                        <a href="user_modify_profile.php" class="btn btn-primary" style="background-color: #007bff; border: none;">Modifier le Profil</a>
+                        <a href="user_modify_profile.php" class="btn btn-primary">Modifier le Profil</a>
                     </div>
                 </div>
             </div>

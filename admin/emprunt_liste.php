@@ -5,29 +5,27 @@ include('../includes/config.php');
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $emprunt_id = $_GET['id'];
     if ($_GET['action'] === 'valider_emprunt') {
-        $stmt = $conn->prepare("UPDATE emprunt SET valide = 1 WHERE id = :id");
-        $stmt->bindParam(':id', $emprunt_id);
-        $stmt->execute();
+        $stmt = $conn->prepare("UPDATE emprunt SET valide = 1 WHERE id = ?");
+        $stmt->execute([$emprunt_id]);
         $message = "L'emprunt a été validé pour récupération.";
     } elseif ($_GET['action'] === 'retourner') {
-        $stmt = $conn->prepare("UPDATE emprunt SET retourne = 1, date_retour = CURDATE() WHERE id = :id");
-        $stmt->bindParam(':id', $emprunt_id);
-        $stmt->execute();
+        $stmt = $conn->prepare("UPDATE emprunt SET retourne = 1, date_retour = CURDATE() WHERE id = ?");
+        $stmt->execute([$emprunt_id]);
         $message = "Le retour du livre a été validé avec succès.";
     } else {
         $message = "Action non reconnue.";
     }
 }
 
-$stmt = $conn->prepare("
+$stmt = $conn->query("
     SELECT e.*, a.nom AS abonne_nom, a.prenom AS abonne_prenom, l.titre AS livre_titre 
     FROM emprunt e 
     JOIN abonne a ON e.abonne_id = a.id 
     JOIN livre l ON e.isbn = l.isbn
 ");
-$stmt->execute();
 $emprunts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -40,7 +38,7 @@ $emprunts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body style="background-color: #f8f9fa;">
     <div class="container" style="margin-top: 50px;">
         <h2 class="text-center mb-4">Liste des Emprunts</h2>
-        <a href="emprunt_ajouter.php" class="btn btn-primary mb-3" style="background-color: #007bff; border-color: #007bff;">Ajouter un Emprunt</a>
+        <!-- <a href="emprunt_ajouter.php" class="btn btn-primary mb-3" style="background-color: #007bff; border-color: #007bff;">Ajouter un Emprunt</a> -->
         <table class="table table-striped" style="border-radius: 8px; overflow: hidden;">
             <thead>
                 <tr>

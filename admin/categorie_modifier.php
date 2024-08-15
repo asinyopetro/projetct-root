@@ -1,25 +1,21 @@
 <?php
-include('../includes/navbar_admin.php');
 include('../includes/config.php');
-
-if (isset($_GET['id'])) {
-    $id = $_GET['id'];
-    $stmt = $conn->prepare("SELECT * FROM categorie WHERE id = :id");
-    $stmt->bindParam(':id', $id);
-    $stmt->execute();
-    $categorie = $stmt->fetch();
-}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = $_POST['id'];
     $nom = $_POST['nom'];
-    $stmt = $conn->prepare("UPDATE categorie SET nom = :nom WHERE id = :id");
-    $stmt->bindParam(':id', $id);
-    $stmt->bindParam(':nom', $nom);
-    $stmt->execute();
+    $stmt = $conn->prepare("UPDATE categorie SET nom = ? WHERE id = ?");
+    $stmt->execute([$nom, $id]);
     header('Location: categorie_liste.php');
+    exit();
+} else if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $stmt = $conn->prepare("SELECT * FROM categorie WHERE id = ?");
+    $stmt->execute([$id]);
+    $categorie = $stmt->fetch();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">

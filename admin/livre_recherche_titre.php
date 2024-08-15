@@ -1,5 +1,5 @@
 <?php
-include('../includes/navbar_user.php');
+include('../includes/navbar_admin.php');;
 include('../includes/config.php');
 
 $livres = [];

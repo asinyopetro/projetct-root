@@ -21,7 +21,7 @@ if (session_status() === PHP_SESSION_NONE) {
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item dropdown">
+                <!-- <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle text-white" href="#" id="userLivresDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Livres
                     </a>
@@ -39,6 +39,18 @@ if (session_status() === PHP_SESSION_NONE) {
                         <a class="dropdown-item" href="../user/emprunt_echus.php">Emprunts échus</a>
                         <a class="dropdown-item" href="../user/emprunt_ajouter.php">Emprunter un livre</a>
                     </div>
+                </li> -->
+                <li class="nav-item">
+                <a class="nav-link text-white" href="../user/home.php">Accueil</a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link text-white" href="../user/livre_recherche_titre.php">Recherche par Titre</a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link text-white" href="../user/livre_recherche_categorie.php">Recherche par Catégorie</a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link text-white" href="../user/emprunt_ajouter.php">Emprunter un livre</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link text-white" href="user_profile.php">Mon Profil</a>

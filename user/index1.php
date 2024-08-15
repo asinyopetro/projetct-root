@@ -2,6 +2,7 @@
 session_start();
 ?>
 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -52,7 +53,7 @@ session_start();
             <div class="jumbotron">
                 <h1 class="display-4">Bienvenue sur l'interface Utilisateur</h1>
                 <p class="lead">Vous pouvez maintenant accéder à toutes les fonctionnalités disponibles.</p>
-                <!-- Ajoutez ici le contenu spécifique à l'interface utilisateur -->
+              
             </div>
         <?php endif; ?>
     </div>
@@ -70,19 +71,19 @@ session_start();
                 <form method="post" action="user_register.php" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="prenom">Prénom</label>
-                        <input type="text" class="form-control" id="prenom" name="prenom" required>
+                        <input type="text" class="form-control" id="prenom" name="prenom">
                     </div>
                     <div class="form-group">
                         <label for="nom">Nom</label>
-                        <input type="text" class="form-control" id="nom" name="nom" required>
+                        <input type="text" class="form-control" id="nom" name="nom">
                     </div>
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <input type="email" class="form-control" id="email" name="email">
                     </div>
                     <div class="form-group">
                         <label for="mot_de_passe">Mot de Passe</label>
-                        <input type="password" class="form-control" id="mot_de_passe" name="mot_de_passe" required>
+                        <input type="password" class="form-control" id="mot_de_passe" name="mot_de_passe">
                     </div>
                     
                     <button type="submit" class="btn btn-primary">S'inscrire</button>
@@ -106,7 +107,7 @@ session_start();
                     <form method="post" action="user_login.php">
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
+                            <input type="email" class="form-control" id="email" name="email">
                         </div>
                         <div class="form-group">
                             <label for="mot_de_passe">Mot de Passe</label>

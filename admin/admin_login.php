@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Vérifier si l'utilisateur est déjà connecté
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
     header('Location: index.php');
     exit();
@@ -9,7 +8,6 @@ if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = $_POST['password'];
-
     if ($password === '96233902') {
         $_SESSION['admin_logged_in'] = true;
         header('Location: index.php');
@@ -25,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion Admin</title>
+    <title>Accueil - Gestion Bibliothèque</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
@@ -45,8 +43,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </style>
 </head>
 <body>
+    <div class="container text-center">
+        <h1>Bienvenue sur l'application de gestion de bibliothèque</h1>
+        <div class="mt-5">
+            <!-- Lien pour afficher le popup de connexion admin -->
+            <a href="#" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#loginModal">Accéder à l'interface Admin</a>
+        </div>
+    </div>
 
-  
+    <!-- Modal pour la connexion admin -->
     <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -57,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form method="post" action="admin_login.php">
+                    <form method="post" action="">
                         <div class="form-group">
                             <label for="password">Mot de passe</label>
                             <input type="password" class="form-control" id="password" name="password" required>
@@ -70,11 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 
-
-    <script>
-        $(document).ready(function(){
-            $('#loginModal').modal('show');
-        });
-    </script>
-
-<?php include('../includes/footer.php'); ?>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

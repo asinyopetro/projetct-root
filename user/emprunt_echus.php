@@ -2,29 +2,29 @@
 include('../includes/navbar_user.php');
 include('../includes/config.php');
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
 
 if (!isset($_SESSION['abonne_id'])) {
-    header('Location: abonne_connexion.php');
+    header('Location: index1.php');
     exit();
 }
 
 $abonne_id = $_SESSION['abonne_id'];
 $aujourdhui = date('Y-m-d');
 
-$stmt = $conn->prepare("
+$sql = "
     SELECT e.*, l.titre AS livre_titre 
     FROM emprunt e 
     JOIN livre l ON e.isbn = l.isbn 
     WHERE e.abonne_id = :abonne_id 
     AND e.date_retour < :aujourdhui 
     AND e.retourne = 0
-");
-$stmt->bindParam(':abonne_id', $abonne_id);
-$stmt->bindParam(':aujourdhui', $aujourdhui);
-$stmt->execute();
+";
+$stmt = $conn->prepare($sql);
+$stmt->execute([
+    ':abonne_id' => $abonne_id,
+    ':aujourdhui' => $aujourdhui
+]);
 $emprunts_echus = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -37,7 +37,7 @@ $emprunts_echus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container " style="margin-top: 80px;">
+    <div class="container" style="margin-top: 80px;">
         <h2 class="mb-4">Emprunts Échus</h2>
         <?php if (empty($emprunts_echus)) { ?>
             <div class="alert alert-info" role="alert">
@@ -68,4 +68,5 @@ $emprunts_echus = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <?php include('../includes/footer.php'); ?>
-
+</body>
+</html>

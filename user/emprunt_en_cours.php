@@ -7,21 +7,20 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 if (!isset($_SESSION['abonne_id'])) {
-    header('Location: abonne_connexion.php');
+    header('Location: index1.php');
     exit();
 }
 
 $abonne_id = $_SESSION['abonne_id'];
-$stmt = $conn->prepare("
+
+$sql = "
     SELECT e.*, l.titre AS livre_titre 
     FROM emprunt e 
     JOIN livre l ON e.isbn = l.isbn 
-    WHERE e.abonne_id = :abonne_id 
+    WHERE e.abonne_id = $abonne_id 
     AND e.retourne = 0
-");
-$stmt->bindParam(':abonne_id', $abonne_id);
-$stmt->execute();
-$emprunts_en_cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
+";
+$emprunts_en_cours = $conn->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -77,4 +76,5 @@ $emprunts_en_cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
   
     <?php include('../includes/footer.php'); ?>
-
+</body>
+</html>

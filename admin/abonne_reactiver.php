@@ -1,17 +1,17 @@
 <?php
-include('../includes/navbar_admin.php');
 include('../includes/config.php');
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    $stmt = $conn->prepare("UPDATE abonne SET statut = 'actif' WHERE id = :id");
-    $stmt->bindParam(':id', $id);
-    $stmt->execute();
+
+    $stmt = $conn->prepare("UPDATE abonne SET statut = 'actif' WHERE id = ?");
+    $stmt->execute([$id]);
+
     header('Location: abonne_liste.php');
+    exit(); 
 }
+
+
 ?>
 
-<h2>Abonné réactivé avec succès.</h2>
-<a href="abonne_liste.php" class="btn btn-primary">Retourner à la liste</a>
 
-<?php include('../includes/footer.php'); ?>

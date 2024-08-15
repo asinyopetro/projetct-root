@@ -4,76 +4,56 @@ include('../includes/navbar_user.php');
 include('../includes/config.php');
 
 if (!isset($_SESSION['abonne_id'])) {
-    header('Location: abonne_connexion.php');
+    header('Location: user_login.php');
     exit();
 }
 
 $abonne_id = $_SESSION['abonne_id'];
-$stmt = $conn->prepare("SELECT statut FROM abonne WHERE id = :id");
-$stmt->bindParam(':id', $abonne_id);
-$stmt->execute();
+$stmt = $conn->prepare("SELECT statut FROM abonne WHERE id = ?");
+$stmt->execute([$abonne_id]);
 $abonne = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($abonne['statut'] === 'suspendu') {
     $error = "Vous êtes suspendu et ne pouvez pas faire d'emprunt.";
 } else {
-    // Récupération des livres disponibles
-   $stmt = $conn->prepare("
-    SELECT l.isbn, l.titre 
-    FROM livre l
-    WHERE l.isbn NOT IN (
-        SELECT e.isbn 
-        FROM emprunt e 
-        WHERE e.retourne = 0 
-        AND (e.date_retour IS NULL OR e.date_retour > NOW())
-    )
-");
-$stmt->execute();
-$livres_disponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
+   
+    $stmt = $conn->prepare("
+        SELECT l.isbn, l.titre 
+        FROM livre l
+    ");
+    $stmt->execute();
+    $livres_disponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $isbn = $_POST['isbn'];
         $date_recuperation = $_POST['date_recuperation'];
-        $date_retour = $_POST['date_retour'];
-        $date_emprunt = date('Y-m-d');
+        $date_retour = date('Y-m-d', strtotime($date_recuperation . ' + 20 days'));
 
-        // Vérification de la disponibilité du livre pour la période sélectionnée
+      
         $stmt = $conn->prepare("
             SELECT * FROM emprunt 
-            WHERE isbn = :isbn 
-            AND retourne = FALSE 
-            AND (date_recuperation BETWEEN :date_recuperation AND :date_retour 
-            OR date_retour BETWEEN :date_recuperation AND :date_retour
-            OR :date_recuperation BETWEEN date_recuperation AND IFNULL(date_retour, :date_retour))
+            WHERE abonne_id = ? 
+            AND isbn = ? 
+            AND retourne = 0
         ");
-        $stmt->bindParam(':isbn', $isbn);
-        $stmt->bindParam(':date_recuperation', $date_recuperation);
-        $stmt->bindParam(':date_retour', $date_retour);
-        $stmt->execute();
-        
+        $stmt->execute([$abonne_id, $isbn]);
+
         if ($stmt->rowCount() > 0) {
-            $error = "Le livre est déjà emprunté durant cette période.";
-        } elseif ($date_recuperation > $date_retour) {
-            $error = "La date de retour doit être après la date de récupération.";
+            $error = "Vous avez déjà emprunté ce livre et ne pouvez pas l'emprunter deux fois en même temps.";
         } else {
+        
             $stmt = $conn->prepare("
                 INSERT INTO emprunt (abonne_id, isbn, date_emprunt, date_recuperation, date_retour) 
-                VALUES (:abonne_id, :isbn, :date_emprunt, :date_recuperation, :date_retour)
+                VALUES (?, ?, NOW(), ?, ?)
             ");
-            $stmt->bindParam(':abonne_id', $abonne_id);
-            $stmt->bindParam(':isbn', $isbn);
-            $stmt->bindParam(':date_emprunt', $date_emprunt);
-            $stmt->bindParam(':date_recuperation', $date_recuperation);
-            $stmt->bindParam(':date_retour', $date_retour);
-            $stmt->execute();
+            $stmt->execute([$abonne_id, $isbn, $date_recuperation, $date_retour]);
             $success_message = "Emprunt ajouté avec succès.";
             header('Refresh:2; url=emprunt_en_cours.php');
         }
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -83,12 +63,8 @@ $livres_disponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Ajouter Emprunt</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .alert {
-            margin-top: 20px;
-        }
+        body { background-color: #f8f9fa; }
+        .alert { margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -98,8 +74,8 @@ $livres_disponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <h2 class="text-center">Ajouter Emprunt</h2>
             </div>
             <div class="card-body">
-                <?php if (isset($error)) { echo "<div class='alert alert-danger'>$error</div>"; } ?>
-                <?php if (isset($success_message)) { echo "<div class='alert alert-success'>$success_message</div>"; } ?>
+                <?php if (isset($error)) echo "<div class='alert alert-danger'>$error</div>"; ?>
+                <?php if (isset($success_message)) echo "<div class='alert alert-success'>$success_message</div>"; ?>
 
                 <?php if (empty($livres_disponibles)) { ?>
                     <div class="alert alert-warning">Aucun livre disponible pour l'emprunt.</div>
@@ -107,7 +83,7 @@ $livres_disponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <form id="empruntForm" method="post" action="emprunt_ajouter.php">
                         <div class="mb-3">
                             <label for="isbn" class="form-label">Choisir un Livre</label>
-                            <select class="form-select" id="isbn" name="isbn" required>
+                            <select class="form-select" id="isbn" name="isbn" >
                                 <option value="">Sélectionnez un livre</option>
                                 <?php foreach ($livres_disponibles as $livre) { ?>
                                     <option value="<?php echo htmlspecialchars($livre['isbn']); ?>"><?php echo htmlspecialchars($livre['titre']); ?></option>
@@ -116,11 +92,11 @@ $livres_disponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                         <div class="mb-3">
                             <label for="date_recuperation" class="form-label">Date de Récupération</label>
-                            <input type="date" class="form-control" id="date_recuperation" name="date_recuperation" required>
+                            <input type="date" class="form-control" id="date_recuperation" name="date_recuperation" >
                         </div>
                         <div class="mb-3">
                             <label for="date_retour" class="form-label">Date de Retour</label>
-                            <input type="date" class="form-control" id="date_retour" name="date_retour" required>
+                            <input type="date" class="form-control" id="date_retour" name="date_retour" >
                         </div>
                         <button type="submit" class="btn btn-primary">Emprunter</button>
                     </form>
@@ -133,11 +109,18 @@ $livres_disponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
     document.getElementById('empruntForm').addEventListener('submit', function(event) {
         let dateRecuperation = new Date(document.getElementById('date_recuperation').value);
         let dateRetour = new Date(document.getElementById('date_retour').value);
+        let isbn = document.getElementById('isbn').value;
 
         if (dateRecuperation > dateRetour) {
             event.preventDefault();
             alert('La date de retour doit être après la date de récupération.');
+            
         }
+        if (isbn === '') {
+        event.preventDefault();
+        alert('Veuillez sélectionner un livre.');
+        return;
+    }
     });
     </script>
     

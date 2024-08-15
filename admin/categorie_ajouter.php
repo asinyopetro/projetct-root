@@ -1,14 +1,25 @@
 <?php
-include('../includes/navbar_admin.php');
+ob_start();
 include('../includes/config.php');
+include('../includes/navbar_admin.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nom = $_POST['nom'];
-    $stmt = $conn->prepare("INSERT INTO categorie (nom) VALUES (:nom)");
-    $stmt->bindParam(':nom', $nom);
-    $stmt->execute();
-    header('Location: categorie_liste.php');
+
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM categorie WHERE nom = ?");
+    $stmt->execute([$nom]);
+    $count = $stmt->fetchColumn();
+
+    if ($count == 0) {
+        $stmt = $conn->prepare("INSERT INTO categorie (nom) VALUES (?)");
+        $stmt->execute([$nom]);
+        header('Location: categorie_liste.php');
+        exit();
+    } else {
+        echo "Une catégorie avec ce nom existe déjà.";
+    }
 }
+ob_end_flush();
 ?>
 
 <!DOCTYPE html>
@@ -22,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
 
-<div class="container " style="margin-top: 200PX;">
+<div class="container" style="margin-top: 200px;">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
             <div class="card shadow-lg border-light">
@@ -59,3 +70,5 @@ document.getElementById('categorieForm').addEventListener('submit', function(eve
 
 <?php include('../includes/footer.php'); ?>
 
+</body>
+</html>

@@ -1,15 +1,13 @@
 <?php
-include('../includes/navbar_admin.php');
 include('../includes/config.php');
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $date_retour = date('Y-m-d');
-    $stmt = $conn->prepare("UPDATE emprunt SET date_retour = :date_retour, retourne = TRUE WHERE id = :id");
-    $stmt->bindParam(':date_retour', $date_retour);
-    $stmt->bindParam(':id', $id);
-    $stmt->execute();
+    $stmt = $conn->prepare("UPDATE emprunt SET date_retour = ?, retourne = TRUE WHERE id = ?");
+    $stmt->execute([$date_retour, $id]);
     header('Location: emprunt_liste.php');
+    exit();
 }
 ?>
 

@@ -1,5 +1,4 @@
 <?php
-include('../includes/navbar_admin.php');
 include('../includes/config.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_GET['id'])) {
@@ -8,21 +7,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_GET['id'])) {
     $prenom = $_POST['prenom'];
     $email = $_POST['email'];
     $statut = $_POST['statut'];
-    $stmt = $conn->prepare("UPDATE abonne SET nom = :nom, prenom = :prenom, email = :email, statut = :statut WHERE id = :id");
-    $stmt->bindParam(':nom', $nom);
-    $stmt->bindParam(':prenom', $prenom);
-    $stmt->bindParam(':email', $email);
-    $stmt->bindParam(':statut', $statut);
-    $stmt->bindParam(':id', $id);
-    $stmt->execute();
+
+    $query = "UPDATE abonne SET nom = ?, prenom = ?, email = ?, statut = ? WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$nom, $prenom, $email, $statut, $id]);
+
     header('Location: abonne_liste.php');
+    exit(); 
 }
 
-$id = $_GET['id'];
-$stmt = $conn->prepare("SELECT * FROM abonne WHERE id = :id");
-$stmt->bindParam(':id', $id);
-$stmt->execute();
-$abonne = $stmt->fetch();
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $query = "SELECT * FROM abonne WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->execute([$id]);
+    $abonne = $stmt->fetch();
+} else {
+    echo "ID non fourni.";
+    exit(); 
+}
 ?>
 
 <!DOCTYPE html>
@@ -32,14 +35,11 @@ $abonne = $stmt->fetch();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier un Abonné - Interface Admin</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
 </head>
 <body>
-
-<div class="container " style="margin-top: 130px;">
+<div class="container" style="margin-top: 130px;">
     <h2 class="text-center mb-4">Modifier un Abonné</h2>
-    <div class="form-container" style=" max-width: 600px;
-            margin: auto;">
+    <div class="form-container" style="max-width: 600px; margin: auto;">
         <div class="card shadow-sm">
             <div class="card-body">
                 <form id="abonneForm" method="post" action="abonne_modifier.php?id=<?php echo htmlspecialchars($abonne['id']); ?>">
@@ -69,8 +69,6 @@ $abonne = $stmt->fetch();
     </div>
 </div>
 
-
-
 <script>
 document.getElementById('abonneForm').addEventListener('submit', function(event) {
     let nom = document.getElementById('nom').value;
@@ -86,5 +84,5 @@ document.getElementById('abonneForm').addEventListener('submit', function(event)
 </script>
 
 <?php include('../includes/footer.php'); ?>
-
-
+</body>
+</html>
